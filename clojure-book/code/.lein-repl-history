@@ -1,0 +1,12 @@
+(require 'clojure.java.io')
+(require 'examples.introduction')
+
+repl
+(require 'examples.introduction')
+(require 'examples.introduction)
+use 'examples.introduction)
+(use 'examples.introduction)
+(take 10 examples.introduction/fibs)
+(take 100 examples.introduction/fibs)
+(take 50 examples.introduction/fibs)
+exit
