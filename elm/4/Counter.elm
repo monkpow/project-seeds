@@ -1,4 +1,4 @@
-module CounterWithRemoveButton (Model, init, Action, update, view, viewWithRemoveButton) where
+module Counter (Model, Context, init, Action, update, view, viewWithRemoveButton) where
 
 import Html exposing (..)
 import Html exposing (div, button, text)

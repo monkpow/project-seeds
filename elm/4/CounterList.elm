@@ -1,6 +1,6 @@
 module CounterList where
 
-import CounterWithRemoveButton
+import Counter
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -8,7 +8,7 @@ import Html.Events exposing (..)
 -- MODEL
 
 type alias Model =
-    { counters : List ( ID, CounterWithRemoveButton.Model )
+    { counters : List ( ID, Counter.Model )
     , nextID : ID
     }
 
@@ -25,15 +25,15 @@ init =
 type Action
     = Insert
     | Remove ID
-    | Modify ID CounterWithRemoveButton.Action
+    | Modify ID Counter.Action
 
 update : Action -> Model -> Model
 update action model =
   case action of
     Insert ->
       { model |
-          counters <- (model.nextID, CounterWithRemoveButton.init 0) :: model.counters,
-          nextId <- model.nextID + 1
+          counters <- (model.nextID, Counter.init 0) :: model.counters,
+          nextID <- model.nextID + 1
       }
 
     Remove id ->
@@ -42,7 +42,7 @@ update action model =
     Modify id counterAction ->
       let updateCounter (counterID, counterModel) =
             if counterID == id
-                then (counterID, CounterWithRemoveButton.update counterAction counterModel)
+                then (counterID, Counter.update counterAction counterModel)
                 else (counterID, counterModel)
       in
           { model | counters <- List.map updateCounter model.counters }
@@ -55,11 +55,11 @@ view address model =
   in
     div [] (insert :: List.map (viewCounter address) model.counters)
 
-viewCounter : Signal.Address Action -> (ID, CounterWithRemoveButton.Model) -> Html
+viewCounter : Signal.Address Action -> (ID, Counter.Model) -> Html
 viewCounter address (id, model) =
   let context =
-        CounterWithRemoveButton.Context
+        Counter.Context
           (Signal.forwardTo address (Modify id))
           (Signal.forwardTo address (always (Remove id)))
   in
-    CounterWithRemoveButton.viewWithRemoveButton context model
+    Counter.viewWithRemoveButton context model
