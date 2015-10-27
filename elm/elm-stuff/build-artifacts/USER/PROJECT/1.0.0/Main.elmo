@@ -10,16 +10,18 @@ Elm.Main.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
-   $Counter = Elm.Counter.make(_elm),
+   $CounterPair = Elm.CounterPair.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var main = $StartApp$Simple.start({_: {}
-                                     ,model: 0
-                                     ,update: $Counter.update
-                                     ,view: $Counter.view});
+                                     ,model: A2($CounterPair.init,
+                                     0,
+                                     0)
+                                     ,update: $CounterPair.update
+                                     ,view: $CounterPair.view});
    _elm.Main.values = {_op: _op
                       ,main: main};
    return _elm.Main.values;

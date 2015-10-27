@@ -25,7 +25,7 @@ Elm.Counter.make = function (_elm) {
             case "Increment":
             return model + 1;}
          _U.badCase($moduleName,
-         "between lines 16 and 18");
+         "between lines 18 and 20");
       }();
    });
    var Decrement = {ctor: "Decrement"};
@@ -48,9 +48,11 @@ Elm.Counter.make = function (_elm) {
                    Increment)]),
                    _L.fromArray([$Html.text("+")]))]));
    });
+   var init = function (count) {
+      return count;
+   };
    _elm.Counter.values = {_op: _op
-                         ,Increment: Increment
-                         ,Decrement: Decrement
+                         ,init: init
                          ,update: update
                          ,view: view};
    return _elm.Counter.values;
