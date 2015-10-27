@@ -1,0 +1,3 @@
+Programs that violate causality – relying on future values – are unimplementable.
+
+Miss explicit in-browser (or any specific) trace debugging strategy
