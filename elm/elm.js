@@ -844,17 +844,17 @@ Elm.Counter.make = function (_elm) {
                          ,view: view};
    return _elm.Counter.values;
 };
-Elm.CounterPair = Elm.CounterPair || {};
-Elm.CounterPair.make = function (_elm) {
+Elm.CounterList = Elm.CounterList || {};
+Elm.CounterList.make = function (_elm) {
    "use strict";
-   _elm.CounterPair = _elm.CounterPair || {};
-   if (_elm.CounterPair.values)
-   return _elm.CounterPair.values;
+   _elm.CounterList = _elm.CounterList || {};
+   if (_elm.CounterList.values)
+   return _elm.CounterList.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   $moduleName = "CounterPair",
+   $moduleName = "CounterList",
    $Basics = Elm.Basics.make(_elm),
    $Counter = Elm.Counter.make(_elm),
    $Html = Elm.Html.make(_elm),
@@ -863,74 +863,119 @@ Elm.CounterPair.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
-   var Bottom = function (a) {
-      return {ctor: "Bottom"
-             ,_0: a};
-   };
-   var Top = function (a) {
-      return {ctor: "Top",_0: a};
-   };
-   var Reset = {ctor: "Reset"};
-   var view = F2(function (address,
-   model) {
-      return A2($Html.div,
-      _L.fromArray([]),
-      _L.fromArray([A2($Counter.view,
-                   A2($Signal.forwardTo,
-                   address,
-                   Top),
-                   model.topCounter)
-                   ,A2($Counter.view,
-                   A2($Signal.forwardTo,
-                   address,
-                   Bottom),
-                   model.bottomCounter)
-                   ,A2($Html.button,
-                   _L.fromArray([A2($Html$Events.onClick,
-                   address,
-                   Reset)]),
-                   _L.fromArray([$Html.text("RESET")]))]));
-   });
-   var init = F2(function (top,
-   bottom) {
-      return {_: {}
-             ,bottomCounter: $Counter.init(bottom)
-             ,topCounter: $Counter.init(top)};
-   });
    var update = F2(function (action,
    model) {
       return function () {
          switch (action.ctor)
-         {case "Bottom":
-            return _U.replace([["bottomCounter"
-                               ,A2($Counter.update,
-                               action._0,
-                               model.bottomCounter)]],
-              model);
-            case "Reset": return A2(init,
-              0,
-              0);
-            case "Top":
-            return _U.replace([["topCounter"
-                               ,A2($Counter.update,
-                               action._0,
-                               model.topCounter)]],
+         {case "Insert":
+            return function () {
+                 var newCounter = {ctor: "_Tuple2"
+                                  ,_0: model.nextID
+                                  ,_1: $Counter.init(0)};
+                 var newCounters = A2($Basics._op["++"],
+                 model.counters,
+                 _L.fromArray([newCounter]));
+                 return _U.replace([["counters"
+                                    ,newCounters]
+                                   ,["nextID",model.nextID + 1]],
+                 model);
+              }();
+            case "Modify":
+            return function () {
+                 var updateCounter = function (_v3) {
+                    return function () {
+                       switch (_v3.ctor)
+                       {case "_Tuple2":
+                          return _U.eq(_v3._0,
+                            action._0) ? {ctor: "_Tuple2"
+                                         ,_0: _v3._0
+                                         ,_1: A2($Counter.update,
+                                         action._1,
+                                         _v3._1)} : {ctor: "_Tuple2"
+                                                    ,_0: _v3._0
+                                                    ,_1: _v3._1};}
+                       _U.badCase($moduleName,
+                       "between lines 47 and 49");
+                    }();
+                 };
+                 return _U.replace([["counters"
+                                    ,A2($List.map,
+                                    updateCounter,
+                                    model.counters)]],
+                 model);
+              }();
+            case "Remove":
+            return _U.replace([["counters"
+                               ,A2($List.drop,
+                               1,
+                               model.counters)]],
               model);}
          _U.badCase($moduleName,
-         "between lines 26 and 37");
+         "between lines 32 and 51");
       }();
    });
+   var Modify = F2(function (a,b) {
+      return {ctor: "Modify"
+             ,_0: a
+             ,_1: b};
+   });
+   var viewCounter = F2(function (address,
+   _v7) {
+      return function () {
+         switch (_v7.ctor)
+         {case "_Tuple2":
+            return A2($Counter.view,
+              A2($Signal.forwardTo,
+              address,
+              Modify(_v7._0)),
+              _v7._1);}
+         _U.badCase($moduleName,
+         "on line 65, column 3 to 60");
+      }();
+   });
+   var Remove = {ctor: "Remove"};
+   var Insert = {ctor: "Insert"};
+   var view = F2(function (address,
+   model) {
+      return function () {
+         var insert = A2($Html.button,
+         _L.fromArray([A2($Html$Events.onClick,
+         address,
+         Insert)]),
+         _L.fromArray([$Html.text("Add")]));
+         var remove = A2($Html.button,
+         _L.fromArray([A2($Html$Events.onClick,
+         address,
+         Remove)]),
+         _L.fromArray([$Html.text("Remove")]));
+         var counters = A2($List.map,
+         viewCounter(address),
+         model.counters);
+         return A2($Html.div,
+         _L.fromArray([]),
+         A2($Basics._op["++"],
+         _L.fromArray([remove,insert]),
+         counters));
+      }();
+   });
+   var init = {_: {}
+              ,counters: _L.fromArray([])
+              ,nextID: 0};
    var Model = F2(function (a,b) {
       return {_: {}
-             ,bottomCounter: b
-             ,topCounter: a};
+             ,counters: a
+             ,nextID: b};
    });
-   _elm.CounterPair.values = {_op: _op
+   _elm.CounterList.values = {_op: _op
+                             ,Model: Model
                              ,init: init
+                             ,Insert: Insert
+                             ,Remove: Remove
+                             ,Modify: Modify
                              ,update: update
                              ,view: view
-                             ,Model: Model};
-   return _elm.CounterPair.values;
+                             ,viewCounter: viewCounter};
+   return _elm.CounterList.values;
 };
 Elm.Debug = Elm.Debug || {};
 Elm.Debug.make = function (_elm) {
@@ -3063,6 +3108,635 @@ Elm.Html.make = function (_elm) {
    return _elm.Html.values;
 };
 Elm.Html = Elm.Html || {};
+Elm.Html.Attributes = Elm.Html.Attributes || {};
+Elm.Html.Attributes.make = function (_elm) {
+   "use strict";
+   _elm.Html = _elm.Html || {};
+   _elm.Html.Attributes = _elm.Html.Attributes || {};
+   if (_elm.Html.Attributes.values)
+   return _elm.Html.Attributes.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Html.Attributes",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $VirtualDom = Elm.VirtualDom.make(_elm);
+   var attribute = $VirtualDom.attribute;
+   var property = $VirtualDom.property;
+   var stringProperty = F2(function (name,
+   string) {
+      return A2(property,
+      name,
+      $Json$Encode.string(string));
+   });
+   var $class = function (name) {
+      return A2(stringProperty,
+      "className",
+      name);
+   };
+   var id = function (name) {
+      return A2(stringProperty,
+      "id",
+      name);
+   };
+   var title = function (name) {
+      return A2(stringProperty,
+      "title",
+      name);
+   };
+   var accesskey = function ($char) {
+      return A2(stringProperty,
+      "accesskey",
+      $String.fromList(_L.fromArray([$char])));
+   };
+   var contextmenu = function (value) {
+      return A2(stringProperty,
+      "contextmenu",
+      value);
+   };
+   var dir = function (value) {
+      return A2(stringProperty,
+      "dir",
+      value);
+   };
+   var draggable = function (value) {
+      return A2(stringProperty,
+      "draggable",
+      value);
+   };
+   var dropzone = function (value) {
+      return A2(stringProperty,
+      "dropzone",
+      value);
+   };
+   var itemprop = function (value) {
+      return A2(stringProperty,
+      "itemprop",
+      value);
+   };
+   var lang = function (value) {
+      return A2(stringProperty,
+      "lang",
+      value);
+   };
+   var tabindex = function (n) {
+      return A2(stringProperty,
+      "tabIndex",
+      $Basics.toString(n));
+   };
+   var charset = function (value) {
+      return A2(stringProperty,
+      "charset",
+      value);
+   };
+   var content = function (value) {
+      return A2(stringProperty,
+      "content",
+      value);
+   };
+   var httpEquiv = function (value) {
+      return A2(stringProperty,
+      "httpEquiv",
+      value);
+   };
+   var language = function (value) {
+      return A2(stringProperty,
+      "language",
+      value);
+   };
+   var src = function (value) {
+      return A2(stringProperty,
+      "src",
+      value);
+   };
+   var height = function (value) {
+      return A2(stringProperty,
+      "height",
+      $Basics.toString(value));
+   };
+   var width = function (value) {
+      return A2(stringProperty,
+      "width",
+      $Basics.toString(value));
+   };
+   var alt = function (value) {
+      return A2(stringProperty,
+      "alt",
+      value);
+   };
+   var preload = function (value) {
+      return A2(stringProperty,
+      "preload",
+      value);
+   };
+   var poster = function (value) {
+      return A2(stringProperty,
+      "poster",
+      value);
+   };
+   var kind = function (value) {
+      return A2(stringProperty,
+      "kind",
+      value);
+   };
+   var srclang = function (value) {
+      return A2(stringProperty,
+      "srclang",
+      value);
+   };
+   var sandbox = function (value) {
+      return A2(stringProperty,
+      "sandbox",
+      value);
+   };
+   var srcdoc = function (value) {
+      return A2(stringProperty,
+      "srcdoc",
+      value);
+   };
+   var type$ = function (value) {
+      return A2(stringProperty,
+      "type",
+      value);
+   };
+   var value = function (value) {
+      return A2(stringProperty,
+      "value",
+      value);
+   };
+   var placeholder = function (value) {
+      return A2(stringProperty,
+      "placeholder",
+      value);
+   };
+   var accept = function (value) {
+      return A2(stringProperty,
+      "accept",
+      value);
+   };
+   var acceptCharset = function (value) {
+      return A2(stringProperty,
+      "acceptCharset",
+      value);
+   };
+   var action = function (value) {
+      return A2(stringProperty,
+      "action",
+      value);
+   };
+   var autocomplete = function (bool) {
+      return A2(stringProperty,
+      "autocomplete",
+      bool ? "on" : "off");
+   };
+   var autosave = function (value) {
+      return A2(stringProperty,
+      "autosave",
+      value);
+   };
+   var enctype = function (value) {
+      return A2(stringProperty,
+      "enctype",
+      value);
+   };
+   var formaction = function (value) {
+      return A2(stringProperty,
+      "formaction",
+      value);
+   };
+   var list = function (value) {
+      return A2(stringProperty,
+      "list",
+      value);
+   };
+   var minlength = function (n) {
+      return A2(stringProperty,
+      "minLength",
+      $Basics.toString(n));
+   };
+   var maxlength = function (n) {
+      return A2(stringProperty,
+      "maxLength",
+      $Basics.toString(n));
+   };
+   var method = function (value) {
+      return A2(stringProperty,
+      "method",
+      value);
+   };
+   var name = function (value) {
+      return A2(stringProperty,
+      "name",
+      value);
+   };
+   var pattern = function (value) {
+      return A2(stringProperty,
+      "pattern",
+      value);
+   };
+   var size = function (n) {
+      return A2(stringProperty,
+      "size",
+      $Basics.toString(n));
+   };
+   var $for = function (value) {
+      return A2(stringProperty,
+      "htmlFor",
+      value);
+   };
+   var form = function (value) {
+      return A2(stringProperty,
+      "form",
+      value);
+   };
+   var max = function (value) {
+      return A2(stringProperty,
+      "max",
+      value);
+   };
+   var min = function (value) {
+      return A2(stringProperty,
+      "min",
+      value);
+   };
+   var step = function (n) {
+      return A2(stringProperty,
+      "step",
+      n);
+   };
+   var cols = function (n) {
+      return A2(stringProperty,
+      "cols",
+      $Basics.toString(n));
+   };
+   var rows = function (n) {
+      return A2(stringProperty,
+      "rows",
+      $Basics.toString(n));
+   };
+   var wrap = function (value) {
+      return A2(stringProperty,
+      "wrap",
+      value);
+   };
+   var usemap = function (value) {
+      return A2(stringProperty,
+      "useMap",
+      value);
+   };
+   var shape = function (value) {
+      return A2(stringProperty,
+      "shape",
+      value);
+   };
+   var coords = function (value) {
+      return A2(stringProperty,
+      "coords",
+      value);
+   };
+   var challenge = function (value) {
+      return A2(stringProperty,
+      "challenge",
+      value);
+   };
+   var keytype = function (value) {
+      return A2(stringProperty,
+      "keytype",
+      value);
+   };
+   var align = function (value) {
+      return A2(stringProperty,
+      "align",
+      value);
+   };
+   var cite = function (value) {
+      return A2(stringProperty,
+      "cite",
+      value);
+   };
+   var href = function (value) {
+      return A2(stringProperty,
+      "href",
+      value);
+   };
+   var target = function (value) {
+      return A2(stringProperty,
+      "target",
+      value);
+   };
+   var downloadAs = function (value) {
+      return A2(stringProperty,
+      "download",
+      value);
+   };
+   var hreflang = function (value) {
+      return A2(stringProperty,
+      "hreflang",
+      value);
+   };
+   var media = function (value) {
+      return A2(stringProperty,
+      "media",
+      value);
+   };
+   var ping = function (value) {
+      return A2(stringProperty,
+      "ping",
+      value);
+   };
+   var rel = function (value) {
+      return A2(stringProperty,
+      "rel",
+      value);
+   };
+   var datetime = function (value) {
+      return A2(stringProperty,
+      "datetime",
+      value);
+   };
+   var pubdate = function (value) {
+      return A2(stringProperty,
+      "pubdate",
+      value);
+   };
+   var start = function (n) {
+      return A2(stringProperty,
+      "start",
+      $Basics.toString(n));
+   };
+   var colspan = function (n) {
+      return A2(stringProperty,
+      "colSpan",
+      $Basics.toString(n));
+   };
+   var headers = function (value) {
+      return A2(stringProperty,
+      "headers",
+      value);
+   };
+   var rowspan = function (n) {
+      return A2(stringProperty,
+      "rowSpan",
+      $Basics.toString(n));
+   };
+   var scope = function (value) {
+      return A2(stringProperty,
+      "scope",
+      value);
+   };
+   var manifest = function (value) {
+      return A2(stringProperty,
+      "manifest",
+      value);
+   };
+   var boolProperty = F2(function (name,
+   bool) {
+      return A2(property,
+      name,
+      $Json$Encode.bool(bool));
+   });
+   var hidden = function (bool) {
+      return A2(boolProperty,
+      "hidden",
+      bool);
+   };
+   var contenteditable = function (bool) {
+      return A2(boolProperty,
+      "contentEditable",
+      bool);
+   };
+   var spellcheck = function (bool) {
+      return A2(boolProperty,
+      "spellcheck",
+      bool);
+   };
+   var async = function (bool) {
+      return A2(boolProperty,
+      "async",
+      bool);
+   };
+   var defer = function (bool) {
+      return A2(boolProperty,
+      "defer",
+      bool);
+   };
+   var scoped = function (bool) {
+      return A2(boolProperty,
+      "scoped",
+      bool);
+   };
+   var autoplay = function (bool) {
+      return A2(boolProperty,
+      "autoplay",
+      bool);
+   };
+   var controls = function (bool) {
+      return A2(boolProperty,
+      "controls",
+      bool);
+   };
+   var loop = function (bool) {
+      return A2(boolProperty,
+      "loop",
+      bool);
+   };
+   var $default = function (bool) {
+      return A2(boolProperty,
+      "default",
+      bool);
+   };
+   var seamless = function (bool) {
+      return A2(boolProperty,
+      "seamless",
+      bool);
+   };
+   var checked = function (bool) {
+      return A2(boolProperty,
+      "checked",
+      bool);
+   };
+   var selected = function (bool) {
+      return A2(boolProperty,
+      "selected",
+      bool);
+   };
+   var autofocus = function (bool) {
+      return A2(boolProperty,
+      "autofocus",
+      bool);
+   };
+   var disabled = function (bool) {
+      return A2(boolProperty,
+      "disabled",
+      bool);
+   };
+   var multiple = function (bool) {
+      return A2(boolProperty,
+      "multiple",
+      bool);
+   };
+   var novalidate = function (bool) {
+      return A2(boolProperty,
+      "noValidate",
+      bool);
+   };
+   var readonly = function (bool) {
+      return A2(boolProperty,
+      "readOnly",
+      bool);
+   };
+   var required = function (bool) {
+      return A2(boolProperty,
+      "required",
+      bool);
+   };
+   var ismap = function (value) {
+      return A2(boolProperty,
+      "isMap",
+      value);
+   };
+   var download = function (bool) {
+      return A2(boolProperty,
+      "download",
+      bool);
+   };
+   var reversed = function (bool) {
+      return A2(boolProperty,
+      "reversed",
+      bool);
+   };
+   var classList = function (list) {
+      return $class($String.join(" ")($List.map($Basics.fst)($List.filter($Basics.snd)(list))));
+   };
+   var style = function (props) {
+      return property("style")($Json$Encode.object($List.map(function (_v0) {
+         return function () {
+            switch (_v0.ctor)
+            {case "_Tuple2":
+               return {ctor: "_Tuple2"
+                      ,_0: _v0._0
+                      ,_1: $Json$Encode.string(_v0._1)};}
+            _U.badCase($moduleName,
+            "on line 156, column 35 to 57");
+         }();
+      })(props)));
+   };
+   var key = function (k) {
+      return A2(stringProperty,
+      "key",
+      k);
+   };
+   _elm.Html.Attributes.values = {_op: _op
+                                 ,key: key
+                                 ,style: style
+                                 ,$class: $class
+                                 ,classList: classList
+                                 ,id: id
+                                 ,title: title
+                                 ,hidden: hidden
+                                 ,type$: type$
+                                 ,value: value
+                                 ,checked: checked
+                                 ,placeholder: placeholder
+                                 ,selected: selected
+                                 ,accept: accept
+                                 ,acceptCharset: acceptCharset
+                                 ,action: action
+                                 ,autocomplete: autocomplete
+                                 ,autofocus: autofocus
+                                 ,autosave: autosave
+                                 ,disabled: disabled
+                                 ,enctype: enctype
+                                 ,formaction: formaction
+                                 ,list: list
+                                 ,maxlength: maxlength
+                                 ,minlength: minlength
+                                 ,method: method
+                                 ,multiple: multiple
+                                 ,name: name
+                                 ,novalidate: novalidate
+                                 ,pattern: pattern
+                                 ,readonly: readonly
+                                 ,required: required
+                                 ,size: size
+                                 ,$for: $for
+                                 ,form: form
+                                 ,max: max
+                                 ,min: min
+                                 ,step: step
+                                 ,cols: cols
+                                 ,rows: rows
+                                 ,wrap: wrap
+                                 ,href: href
+                                 ,target: target
+                                 ,download: download
+                                 ,downloadAs: downloadAs
+                                 ,hreflang: hreflang
+                                 ,media: media
+                                 ,ping: ping
+                                 ,rel: rel
+                                 ,ismap: ismap
+                                 ,usemap: usemap
+                                 ,shape: shape
+                                 ,coords: coords
+                                 ,src: src
+                                 ,height: height
+                                 ,width: width
+                                 ,alt: alt
+                                 ,autoplay: autoplay
+                                 ,controls: controls
+                                 ,loop: loop
+                                 ,preload: preload
+                                 ,poster: poster
+                                 ,$default: $default
+                                 ,kind: kind
+                                 ,srclang: srclang
+                                 ,sandbox: sandbox
+                                 ,seamless: seamless
+                                 ,srcdoc: srcdoc
+                                 ,reversed: reversed
+                                 ,start: start
+                                 ,align: align
+                                 ,colspan: colspan
+                                 ,rowspan: rowspan
+                                 ,headers: headers
+                                 ,scope: scope
+                                 ,async: async
+                                 ,charset: charset
+                                 ,content: content
+                                 ,defer: defer
+                                 ,httpEquiv: httpEquiv
+                                 ,language: language
+                                 ,scoped: scoped
+                                 ,accesskey: accesskey
+                                 ,contenteditable: contenteditable
+                                 ,contextmenu: contextmenu
+                                 ,dir: dir
+                                 ,draggable: draggable
+                                 ,dropzone: dropzone
+                                 ,itemprop: itemprop
+                                 ,lang: lang
+                                 ,spellcheck: spellcheck
+                                 ,tabindex: tabindex
+                                 ,challenge: challenge
+                                 ,keytype: keytype
+                                 ,cite: cite
+                                 ,datetime: datetime
+                                 ,pubdate: pubdate
+                                 ,manifest: manifest
+                                 ,property: property
+                                 ,attribute: attribute};
+   return _elm.Html.Attributes.values;
+};
+Elm.Html = Elm.Html || {};
 Elm.Html.Events = Elm.Html.Events || {};
 Elm.Html.Events.make = function (_elm) {
    "use strict";
@@ -3684,18 +4358,16 @@ Elm.Main.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
-   $CounterPair = Elm.CounterPair.make(_elm),
+   $CounterList = Elm.CounterList.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var main = $StartApp$Simple.start({_: {}
-                                     ,model: A2($CounterPair.init,
-                                     0,
-                                     0)
-                                     ,update: $CounterPair.update
-                                     ,view: $CounterPair.view});
+                                     ,model: $CounterList.init
+                                     ,update: $CounterList.update
+                                     ,view: $CounterList.view});
    _elm.Main.values = {_op: _op
                       ,main: main};
    return _elm.Main.values;
