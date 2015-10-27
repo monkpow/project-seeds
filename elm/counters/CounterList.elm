@@ -18,7 +18,7 @@ init : Model
 init =
     { counters = []
     , nextID = 0
-    } 
+    }
 
 -- UPDATE
 
